@@ -5,6 +5,7 @@ package com.lambdaworks.crypto;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
 
 import static com.lambdaworks.codec.Base64.*;
 
@@ -28,6 +29,23 @@ import static com.lambdaworks.codec.Base64.*;
  * @author  Will Glozer
  */
 public class SCryptUtil {
+
+    private static final String SECURE_RANDOM_PROPERTY = "com.lambdaworks.secureRandom.algorithm";
+    private static final SecureRandom SECURE_RANDOM;
+
+    static {
+        String algorithm = System.getProperty(SECURE_RANDOM_PROPERTY);
+        if (algorithm == null) {
+            algorithm = "SHA1PRNG";
+        }
+
+        try {
+            SECURE_RANDOM = SecureRandom.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(String.format("Can't instantiate SecureRandom with algorithm %s. " +
+                    "Check %s system property", algorithm, SECURE_RANDOM_PROPERTY));
+        }
+    }
     /**
      * Hash the supplied plaintext password and generate output in the format described
      * in {@link SCryptUtil}.
@@ -42,7 +60,7 @@ public class SCryptUtil {
     public static String scrypt(String passwd, int N, int r, int p) {
         try {
             byte[] salt = new byte[16];
-            SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
+            SECURE_RANDOM.nextBytes(salt);
 
             byte[] derived = SCrypt.scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
 
