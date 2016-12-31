@@ -56,6 +56,12 @@ Native Code Implementation
     jar: extract native library from jar and load with System.load
     sys: use System.loadLibrary, which may require java.library.path to be set
 
+
+Salt generation
+
+    The system property "com.lambdaworks.secureRandom.algorithm" may be set to override
+        default algorithm SHA1PRNG for generation salt
+
 Maven Artifacts
 
   Releases containing the pure Java implementation, as well as native libraries
